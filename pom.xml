@@ -6,7 +6,7 @@
 
     <groupId>com.devskiller</groupId>
     <artifactId>cd-demo</artifactId>
-    <version>1-${parsedVersion.newBuildNumber}-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -38,7 +38,8 @@
             <id>release</id>
             <properties>
                 <newVersionString>${parsedVersion.majorVersion}-${parsedVersion.newBuildNumber}</newVersionString>
-                <releaseVersionString>${parsedVersion.majorVersion}-${formattedVersion.buildNumber}</releaseVersionString>
+                <releaseVersionString>${parsedVersion.majorVersion}-${formattedVersion.buildNumber}
+                </releaseVersionString>
             </properties>
             <build>
                 <finalName>cd-demo-${releaseVersionString}</finalName>
@@ -54,9 +55,6 @@
                                 <goals>
                                     <goal>parse-version</goal>
                                 </goals>
-                                <configuration>
-                                    <formatBuildNumber>b%d</formatBuildNumber>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -72,9 +70,7 @@
                                     <goal>set</goal>
                                 </goals>
                                 <configuration>
-                                    <newVersion>
-                                        ${newVersionString}-SNAPSHOT
-                                    </newVersion>
+                                    <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</newVersion>
                                 </configuration>
                             </execution>
                         </executions>
@@ -115,23 +111,21 @@
                     <plugin>
                         <groupId>de.jutzig</groupId>
                         <artifactId>github-release-plugin</artifactId>
-                        <version>1.1.1</version>
+                        <version>1.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>release-artifacts</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>release</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                         <configuration>
                             <description>Description of your release</description>
                             <releaseName>1.0 Final</releaseName>
                             <tag>${project.version}</tag>
 
-                            <!-- If your project has additional artifacts, such as ones produced by
-                                 the maven-assembly-plugin, you can define the following
-                                 (requires version 1.1.1 of the plugin or higher): -->
-                            <fileSets>
-                                <fileSet>
-                                    <directory>${project.build.directory}</directory>
-                                    <includes>
-                                        <include>${project.artifactId}*.jar</include>
-                                    </includes>
-                                </fileSet>
-                            </fileSets>
                         </configuration>
                     </plugin>
                 </plugins>
