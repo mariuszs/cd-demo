@@ -6,4 +6,4 @@ before_install:
 - git config --global user.name "Travis CI"
 install: true
 script:
-- ./mvnw clean deploy $( [[ $TRAVIS_COMMIT_MESSAGE =~ .*doRelease.* ]] && echo "-Prelease" )
+- ./mvnw clean deploy -Prelease --settings .mvn/settings.xml
