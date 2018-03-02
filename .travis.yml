@@ -5,5 +5,11 @@ before_install:
 - git config --global user.email "builds@travis-ci.com"
 - git config --global user.name "Travis CI"
 install: true
+
+
+before_script:
+- if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw initialize -Pversion; fi
+
 script:
-- ./mvnw clean deploy -Prelease --settings .mvn/settings.xml
+- if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw deploy --settings .mvn/settings.xml; else ./mvnw install; fi
+

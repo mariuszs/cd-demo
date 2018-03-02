@@ -34,37 +34,107 @@
     </scm>
 
     <profiles>
+        
+        <!-- Release to github -->
         <profile>
             <id>release</id>
-            <properties>
-                <newVersionString>${parsedVersion.majorVersion}-${parsedVersion.newBuildNumber}</newVersionString>
-                <releaseVersionString>${parsedVersion.majorVersion}-${formattedVersion.buildNumber}
-                </releaseVersionString>
-            </properties>
             <build>
-                <finalName>cd-demo-${releaseVersionString}</finalName>
                 <plugins>
+
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.1</version>
+                        <groupId>de.jutzig</groupId>
+                        <artifactId>github-release-plugin</artifactId>
+                        <version>1.2.0</version>
                         <executions>
                             <execution>
-                                <phase>validate</phase>
+                                <id>release-artifacts</id>
+                                <phase>deploy</phase>
                                 <goals>
-                                    <goal>run</goal>
+                                    <goal>release</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <description>Description of your release</description>
+                            <releaseName>1.0 Final</releaseName>
+                            <tag>${project.version}</tag>
+
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>parse-version</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>parse-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <version>2.5</version>
+                        <executions>
+                            <execution>
+                                <id>switch-to-snapshot-version</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>set</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
-                                        <echo>Displaying 3 environment variables</echo>
-                                        <echo>[env.GITHUBKEY] ${env.GITHUBKEY}</echo>
-                                        <echo>[M2_HOME] ${env.M2_HOME}</echo>
-                                        <echo>[Path] ${env.Path}</echo>
-                                    </tasks>
+                                    <allowSnapshots/>
+                                    <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT</newVersion>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-scm-plugin</artifactId>
+                        <version>1.9.5</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>tag-new-release</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>tag</goal>
+                                </goals>
+                                <configuration>
+                                    <tag>v${project.version}</tag>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>save-changes</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>checkin</goal>
+                                </goals>
+                                <configuration>
+                                    <connectionType>connection</connectionType>
+                                    <includes>pom.xml</includes>
+                                    <message>Setting next development version to ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT.
+
+                                        [ci skip]</message>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Set version for release-->
+        <profile>
+            <id>version</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
@@ -95,59 +165,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-scm-plugin</artifactId>
-                        <version>1.9.5</version>
-                        <inherited>false</inherited>
-                        <executions>
-                            <execution>
-                                <id>tag-new-release</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>tag</goal>
-                                </goals>
-                                <configuration>
-                                    <tag>v${releaseVersionString}</tag>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>save-changes</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>checkin</goal>
-                                </goals>
-                                <configuration>
-                                    <connectionType>connection</connectionType>
-                                    <includes>pom.xml</includes>
-                                    <message>Set version to v${newVersionString}</message>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <pushChanges>false</pushChanges>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>de.jutzig</groupId>
-                        <artifactId>github-release-plugin</artifactId>
-                        <version>1.2.0</version>
-                        <executions>
-                            <execution>
-                                <id>release-artifacts</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>release</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <description>Description of your release</description>
-                            <releaseName>1.0 Final</releaseName>
-                            <tag>${project.version}</tag>
-
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

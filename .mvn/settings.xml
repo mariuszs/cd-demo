@@ -7,7 +7,7 @@
         </server>
         <server>
             <id>github</id>
-            <username>${env.GITHUBKEY}</username>
+            <privateKey>${env.GITHUBKEY}</privateKey>
         </server>
     </servers>
 
