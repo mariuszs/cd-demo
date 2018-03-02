@@ -7,7 +7,7 @@ before_install:
 - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then git checkout master; fi
 install: true
 script:
-- if [[ $TRAVIS_COMMIT_MESSAGE = *"DO_RELEASE"* && $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw deploy --settings .mvn/settings.xml; else ./mvnw install; fi
+- if [[ $TRAVIS_COMMIT_MESSAGE =~ .*doRelease.* && $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw deploy --settings .mvn/settings.xml; else ./mvnw install; fi
 branches:
   except:
   - "/^v\\d/"
