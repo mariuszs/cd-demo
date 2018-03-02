@@ -6,8 +6,6 @@ before_install:
 - git config --global user.name "Travis CI"
 - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then git checkout master; fi
 install: true
-before_script:
-- if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw initialize -Pversion; fi
 script:
 - if [[ $TRAVIS_PULL_REQUEST == "false" && $TRAVIS_BRANCH == "master" ]]; then ./mvnw deploy --settings .mvn/settings.xml; else ./mvnw install; fi
 branches:

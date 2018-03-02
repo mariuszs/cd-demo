@@ -6,13 +6,14 @@
 
     <groupId>com.devskiller</groupId>
     <artifactId>cd-demo</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>${revision}</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <revision>${git.commit.id.describe-short}</revision>
     </properties>
 
     <developers>
@@ -59,7 +60,75 @@
             <id>release</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                        <version>2.2.4</version>
+                        <executions>
+                            <execution>
+                                <id>get-the-git-infos</id>
+                                <goals>
+                                    <goal>revision</goal>
+                                </goals>
+                                <phase>initialize</phase>
+                            </execution>
+                            <execution>
+                                <id>validate-the-git-infos</id>
+                                <goals>
+                                    <goal>validateRevision</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <injectAllReactorProjects>true</injectAllReactorProjects>
 
+                        </configuration>
+                    </plugin>
+                    <!-- verbose -->
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <configuration>
+                                    <target>
+                                        <echo>Git Version: ${git.commit.id.describe-short}</echo>
+                                        <echo>Revision: ${revision}</echo>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- broken -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>flatten-maven-plugin</artifactId>
+                        <version>1.0.1</version>
+                        <configuration>
+                            <updatePomFile>true</updatePomFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>flatten</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>flatten</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>flatten.clean</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>de.jutzig</groupId>
                         <artifactId>github-release-plugin</artifactId>
@@ -74,118 +143,16 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <releaseName>${project.version}</releaseName>
-                            <tag>${project.version}</tag>
+                            <skipe>true</skipe>
+                            <releaseName>${revision}</releaseName>
+                            <tag>${revision}</tag>
                         </configuration>
                     </plugin>
 
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>parse-version</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>parse-version</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>versions-maven-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>switch-to-snapshot-version</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>set</goal>
-                                </goals>
-                                <configuration>
-                                    <allowSnapshots/>
-                                    <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT</newVersion>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-scm-plugin</artifactId>
-                        <version>1.9.5</version>
-                        <inherited>false</inherited>
-                        <executions>
-                            <execution>
-                                <id>tag-new-release</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>tag</goal>
-                                </goals>
-                                <configuration>
-                                    <tag>v${project.version}</tag>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>save-changes</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>checkin</goal>
-                                </goals>
-                                <configuration>
-                                    <connectionType>connection</connectionType>
-                                    <includes>pom.xml</includes>
-                                    <message>Setting next development version to ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT.
-
-                                        [ci skip]</message>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!-- Set version for release-->
-        <profile>
-            <id>version</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>parse-version</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>parse-version</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>versions-maven-plugin</artifactId>
-                        <version>2.5</version>
-                        <executions>
-                            <execution>
-                                <id>set-release-version</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>set</goal>
-                                </goals>
-                                <configuration>
-                                    <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</newVersion>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
 </project>
